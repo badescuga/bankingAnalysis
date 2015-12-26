@@ -8,4 +8,4 @@ require('babel/register')({
   optional: ['es7.asyncFunctions']
 });
 
-var app = require('./server-load');
+var app = require('./app');
