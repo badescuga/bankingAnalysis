@@ -9,7 +9,7 @@ var storage =   multer.diskStorage({
     callback(null, file.fieldname + '-' + Date.now());
   }
 });
-var upload = multer({ storage : storage}).single('userPhoto');
+var upload = multer({ storage : storage}).single('bankingData');
 
 app.use(express.static(__dirname + '/public'));
 
@@ -20,7 +20,7 @@ app.get('/',function(req,res){
 app.post('/api/uploadData',function(req,res){
     upload(req,res,function(err) {
         if(err) {
-            return res.end("Error uploading file.");
+            return res.end("Error uploading file. Error: "+err);
         }
         res.end("File is uploaded");
     });
