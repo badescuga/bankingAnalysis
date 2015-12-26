@@ -1,41 +1,22 @@
 <html>
 
 <head>
-    <title>File upload Node.</title>
+    <title>Banking Analysis</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery.form/3.51/jquery.form.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
+    <script type="text/javascript" src="js/index.js"></script>
+    <script>
+     
+    </script>
 </head>
 
-<body>
+<body onload="startLoading();">
     <form id="uploadForm" enctype="multipart/form-data" action="/api/uploadData" method="post">
         <input type="file" name="bankingData" />
         <input type="submit" value="Upload Data" name="submit">
         <span id="status"></span>
     </form>
 </body>
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-<script src="http://cdnjs.cloudflare.com/ajax/libs/jquery.form/3.51/jquery.form.min.js"></script>
-<script>
-    $(document).ready(function() {
-
-     //upload file through ajax
-     $('#uploadForm').submit(function() {
-        $("#status").empty().text("File is uploading...");
-        $(this).ajaxSubmit({
-
-            error: function(xhr) {
-           status('Error: ' + xhr.status);
-            },
-
-            success: function(response) {
-             var respObj = JSON.parse(response);
-        $("#status").empty().text(respObj.responseMessage);
-        console.dir(JSON.stringify(respObj.response)); // filename of the banking file
-            }
-    });
-    //Very important line, it disable the page refresh.
-    return false;
-    });    
-});
-
-</script>
 
 </html>
