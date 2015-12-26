@@ -12,6 +12,8 @@
     "serve-favicon": "~2.3.0",
     "node-xlsx": "*",
     "multer":"*",
-    "babel":"5.x"
+    "babel":"5.x",
+    "uuid":"*",
+    "circular-json":"*"
   }
 }
