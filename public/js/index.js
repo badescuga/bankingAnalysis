@@ -187,6 +187,9 @@ console.log('in index.js ---- ');
 
 var dataLoaded;
 var dataLoadedProcessed;
+var startDate, endDate;
+var myLineChart;
+
 
 function getQueryParams(qs) {
     qs = qs.split('+').join(' ');
@@ -202,6 +205,16 @@ function getQueryParams(qs) {
     return params;
 }
 
+function addDays(date, days) {
+    //  console.log(date);
+
+    var dat = date;
+    dat.setDate(dat.getDate() + days);
+    console.log('new date: '+ dat);
+    return dat;
+}
+
+
 function loadExistingData(dataId) {
     $.ajax({
         method: "GET",
@@ -213,7 +226,6 @@ function loadExistingData(dataId) {
         dataLoaded = JSON.parse(data);
         dataLoadedProcessed = null;
         LoadDataForIngRomania(); //load data parser for romania
-        PlotDaySpending(); // plot
     });
 }
 
@@ -226,6 +238,10 @@ function startLoading() {
     }
 
     $(document).ready(function () {
+
+        $("#startDate").datepicker();
+        $("#endDate").datepicker();
+
         console.log('starting to load');
         //upload file through ajax
         $('#uploadForm').submit(function () {
@@ -334,7 +350,7 @@ function LoadDataForIngRomania() {
                         month = -1;
                         break;
                 }
-                  console.log("--- dates "+ dateValues[1].toLowerCase()+" / "+month +" / "+ array[i][1]);
+                console.log("--- dates " + dateValues[1].toLowerCase() + " / " + month + " / " + array[i][1]);
             } else {
                 console.log('!!! couldnt convert:' + dateToConvert);
             }
@@ -371,37 +387,74 @@ function LoadDataForIngRomania() {
 
 
     }
+    
+    //reverse order (right now, it's from thew newest to oldest)
+    dataLoadedProcessed.reverse();
 
 }
 ///////////// General Plots
 
-function PlotDaySpending() {
-    var dict = [];
-
-    dataLoadedProcessed.forEach(function (element) {
-        if (element.type === 'spent') {
-            if (dict[element.date.toString()] === undefined) {
-                dict[element.date.toString()] = 0;
-            }
-
-            dict[element.date.toString()] += element.value;
-        }
-
-    }, this);
-    
+function ActualPlot(dict, sampleSize) {
     //data
     var values = [];
-    Object.keys(dict).forEach(function (item) {
-        values.push(dict[item]);
+    var _sD, _eD;
+
+    Object.keys(dict).forEach(function (key) {
+        values.push(dict[key]);
+        var date = new Date(key);
+        if (date < _sD || _sD == null) {
+            _sD = date;
+        }
+
+        if (date > _eD || _eD == null) {
+            _eD = date;
+        }
     });
 
-    console.dir(Object.keys(dict));
-    console.dir(values);
-    console.dir(dataLoadedProcessed);
+    var totalDays = Math.round((_eD - _sD) / (1000 * 60 * 60 * 24));
+    var daysInterval = Math.round(totalDays / sampleSize);
 
+    console.log(_sD + " " + _eD);
+    console.log('days interval: ' + daysInterval);
+    // console.dir(Object.keys(dict));
+    //console.dir(dict);
+    // console.dir(dataLoadedProcessed);
+    
+    /// created a distribution of data (i.e. for 5 months, it could be tedious to have every day displayed)
+    
+    var dict2 = {};
+    var values2 = [];
+    //   var labels2 = [];
+    var currentSegment = null;
+    var i = 0;
+    values.forEach(function (elem) {
+        var date = new Date(Object.keys(dict)[i]);
+        console.log(date + " " + currentSegment);
+        if (currentSegment === null) {
+            currentSegment = addDays(date, daysInterval);
+        } else if (currentSegment < date) {
+            currentSegment = addDays(currentSegment, daysInterval);
+        }
+
+        //    console.log(currentSegment);
+
+        if (dict2[currentSegment] === undefined) {
+            dict2[currentSegment] = 0;
+        } else {
+            dict2[currentSegment] += elem;
+        }
+        i++;
+    });
+
+    Object.keys(dict2).forEach(function (key) {
+        values2.push(dict2[key]);
+    });
+
+    console.dir(values2);
+    console.dir(dict2);
 
     var data = {
-        labels: Object.keys(dict),
+        labels: Object.keys(dict2),
         datasets: [
             {
                 label: "My First dataset",
@@ -411,7 +464,7 @@ function PlotDaySpending() {
                 pointStrokeColor: "#fff",
                 pointHighlightFill: "#fff",
                 pointHighlightStroke: "rgba(220,220,220,1)",
-                data: values
+                data: values2
             }
             // ,
             // {
@@ -427,6 +480,50 @@ function PlotDaySpending() {
         ]
     };
 
+    if (myLineChart) {
+        myLineChart.destroy();
+    }
     var ctx = $("#daySpendingPlot").get(0).getContext("2d");
-    var myLineChart = new Chart(ctx).Line(data, chartOptions);
+    myLineChart = new Chart(ctx).Line(data, chartOptions);
+
+}
+
+function PlotDay(inputType) {
+    var dict = [];
+
+    var _sD = $('#startDate').datepicker('getDate');
+    var _eD = $('#endDate').datepicker('getDate');
+
+    dataLoadedProcessed.forEach(function (element) {
+
+        if (_sD != null && _sD > element.date) {
+            return;
+        }
+
+        if (_eD != null && _eD < element.date) {
+            return;
+        }
+
+        if (element.type === inputType) {
+            if (dict[element.date.toString()] === undefined) {
+                dict[element.date.toString()] = 0;
+            }
+
+            dict[element.date.toString()] += element.value;
+        }
+
+    }, this);
+
+    ActualPlot(dict, 12);
+}
+
+
+//===========END PLOTS
+
+function showPlotForSpending() {
+    PlotDay('spent');
+}
+
+function showPlotForReceiving() {
+    PlotDay('received');
 }

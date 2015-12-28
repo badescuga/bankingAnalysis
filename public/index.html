@@ -5,9 +5,10 @@
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery.form/3.51/jquery.form.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.0-beta.1/jquery-ui.min.js"></script>
     <script type="text/javascript" src="js/index.js"></script>
     <script>
-     
+
     </script>
 </head>
 
@@ -17,7 +18,20 @@
         <input type="submit" value="Upload Data" name="submit">
         <span id="status"></span>
     </form>
-    <canvas id="daySpendingPlot" width="550" height=400"></canvas>
+    <div id='componentForLoadedData'>
+        <div>
+            <p>Start Date:
+                <input type="text" id="startDate">
+            </p>
+            <p>End Date:
+                <input type="text" id="endDate">
+            </p>
+            <br/></br>
+            <button onclick="showPlotForSpending()">Plot Spending</button>
+            <button onclick="showPlotForReceiving()">Plot Received</button>
+        </div>
+    </div>
+    <canvas id="daySpendingPlot" width="550" height=400 "></canvas>
 </body>
 
 </html>
