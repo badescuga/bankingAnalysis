@@ -210,7 +210,7 @@ function addDays(date, days) {
 
     var dat = date;
     dat.setDate(dat.getDate() + days);
-    console.log('new date: '+ dat);
+    console.log('new date: ' + dat);
     return dat;
 }
 
@@ -360,7 +360,7 @@ function LoadDataForIngRomania() {
             name = array[i][3]; // not generic; ex: Cumparare POS
             type = null; // 'spent' / 'íncome'
             thirdParty = null;
-            console.log('>>'+date);
+            console.log('>>' + date);
         }
 
 
@@ -368,8 +368,8 @@ function LoadDataForIngRomania() {
             //i got a new 'spend' row; close existing data
             type = 'spent';
             value = customParse(array[i][5]);
-            console.log("!!!!! "+ value+ " "+ array[i][5]);
-            
+            console.log("!!!!! " + value + " " + array[i][5]);
+
         } else if (array[i].length >= 7 && array[i][7]) {
             //i got a new 'income' row; close existing data
             type = 'received';
@@ -397,7 +397,7 @@ function LoadDataForIngRomania() {
 
 function customParse(str) {
     str = str.substring(0, str.indexOf(','));
-    str = str.replace('.','');
+    str = str.replace('.', '');
     return parseInt(str);
 }
 ///////////// General Plots
@@ -418,8 +418,8 @@ function ActualPlot(dict, sampleSize) {
             _eD = date;
         }
     });
-   
-   console.log(dict);
+
+    console.log(dict);
     var totalDays = Math.round((_eD - _sD) / (1000 * 60 * 60 * 24));
     var daysInterval = Math.round(totalDays / sampleSize);
 
@@ -438,7 +438,7 @@ function ActualPlot(dict, sampleSize) {
     var i = 0;
     values.forEach(function (elem) {
         var date = new Date(Object.keys(dict)[i]);
-      //  console.log(date + " " + currentSegment);
+        //  console.log(date + " " + currentSegment);
         if (currentSegment === null) {
             currentSegment = addDays(date, daysInterval);
         } else if (currentSegment < date) {
@@ -525,6 +525,66 @@ function PlotDay(inputType) {
     }, this);
 
     ActualPlot(dict, 8);
+    var transNameDetails = showTransactionsNameDetails(_sD, _eD, inputType);
+    var transThirdPartyDetails = showTransactionsThirdPartyDetails(_sD, _eD, inputType);
+    $('#transactionNameDetails').empty();
+    $('#transactionThirdPartyDetails').empty();
+    Object.keys(transNameDetails).forEach(function (item) {
+        $('#transactionNameDetails').append(" <input type='checkbox' name='transName' value='"+item+"' checked='checked'/>" + item + "<br/>");
+    });
+    Object.keys(transThirdPartyDetails).forEach(function (item) {
+        $('#transactionThirdPartyDetails').append(" <input type='checkbox' name='transName' value='"+item+"' checked='checked'/>" + item + "<br/>");
+        //   $('#transactionThirdPartyDetails').append("<p>" + item + "  </p>");
+    });
+
+}
+
+function showTransactionsNameDetails(startDate, endDate, inputType) {
+    var dict = {};
+    dataLoadedProcessed.forEach(function (element) {
+
+        if (startDate != null && startDate > element.date) {
+            return;
+        }
+
+        if (endDate != null && endDate < element.date) {
+            return;
+        }
+
+        if (element.type === inputType) {
+            if (dict[element.name] === undefined) {
+                dict[element.name] = 0;
+            }
+            dict[element.name] += element.value;
+        }
+
+    }, this);
+
+    return dict;
+}
+
+function showTransactionsThirdPartyDetails(startDate, endDate, inputType) {
+    var dict = {};
+    dataLoadedProcessed.forEach(function (element) {
+
+        if (startDate != null && startDate > element.date) {
+            return;
+        }
+
+        if (endDate != null && endDate < element.date) {
+            return;
+        }
+
+        if (element.type === inputType) {
+            if (dict[element.thirdParty] === undefined) {
+                dict[element.thirdParty] = 0;
+            }
+            dict[element.thirdParty] += element.value;
+        }
+
+    }, this);
+
+    return dict;
 }
 
 
