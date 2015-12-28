@@ -356,10 +356,11 @@ function LoadDataForIngRomania() {
             }
             
             //new entry
-            date = new Date(dateValues[2], month, dateValues[0]);
+            date = new Date(dateValues[2], month - 1, dateValues[0]);
             name = array[i][3]; // not generic; ex: Cumparare POS
             type = null; // 'spent' / 'íncome'
             thirdParty = null;
+            console.log('>>'+date);
         }
 
 
@@ -410,7 +411,8 @@ function ActualPlot(dict, sampleSize) {
             _eD = date;
         }
     });
-
+   
+   console.log(dict);
     var totalDays = Math.round((_eD - _sD) / (1000 * 60 * 60 * 24));
     var daysInterval = Math.round(totalDays / sampleSize);
 
@@ -429,7 +431,7 @@ function ActualPlot(dict, sampleSize) {
     var i = 0;
     values.forEach(function (elem) {
         var date = new Date(Object.keys(dict)[i]);
-        console.log(date + " " + currentSegment);
+      //  console.log(date + " " + currentSegment);
         if (currentSegment === null) {
             currentSegment = addDays(date, daysInterval);
         } else if (currentSegment < date) {
@@ -490,6 +492,7 @@ function ActualPlot(dict, sampleSize) {
 
 function PlotDay(inputType) {
     var dict = [];
+    console.log(dataLoadedProcessed);
 
     var _sD = $('#startDate').datepicker('getDate');
     var _eD = $('#endDate').datepicker('getDate');
@@ -514,7 +517,7 @@ function PlotDay(inputType) {
 
     }, this);
 
-    ActualPlot(dict, 12);
+    ActualPlot(dict, 8);
 }
 
 
