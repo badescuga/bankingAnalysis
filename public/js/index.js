@@ -130,7 +130,7 @@ Chart.defaults.global = {
     onAnimationComplete: function () { }
 }
 
-Chart.defaults.global.responsive = true;
+//Chart.defaults.global.responsive = true;
 
 var chartOptions = {
 
@@ -367,12 +367,13 @@ function LoadDataForIngRomania() {
         if (array[i].length >= 5 && array[i][5]) {
             //i got a new 'spend' row; close existing data
             type = 'spent';
-            value = parseFloat(array[i][5]);
-
+            value = customParse(array[i][5]);
+            console.log("!!!!! "+ value+ " "+ array[i][5]);
+            
         } else if (array[i].length >= 7 && array[i][7]) {
             //i got a new 'income' row; close existing data
             type = 'received';
-            value = parseFloat(array[i][7]);
+            value = customParse(array[i][7]);
         }
         // because there are no general rules, i'm going to search for a specific pattern
         var keyWords = ['terminal', 'ordonator'];
@@ -392,6 +393,12 @@ function LoadDataForIngRomania() {
     //reverse order (right now, it's from thew newest to oldest)
     dataLoadedProcessed.reverse();
 
+}
+
+function customParse(str) {
+    str = str.substring(0, str.indexOf(','));
+    str = str.replace('.','');
+    return parseInt(str);
 }
 ///////////// General Plots
 
