@@ -189,7 +189,9 @@ var dataLoaded;
 var dataLoadedProcessed;
 var startDate, endDate;
 var myLineChart;
-
+var toExcludeName = [], toExcludeThirdParty = [];
+var graphSegments = 8;
+var modifiedCheckboxes = false;
 
 function getQueryParams(qs) {
     qs = qs.split('+').join(' ');
@@ -497,9 +499,11 @@ function ActualPlot(dict, sampleSize) {
 
 }
 
+var inpType;
 function PlotDay(inputType) {
     var dict = [];
     console.log(dataLoadedProcessed);
+    inpType = inputType;
 
     var _sD = $('#startDate').datepicker('getDate');
     var _eD = $('#endDate').datepicker('getDate');
@@ -514,6 +518,14 @@ function PlotDay(inputType) {
             return;
         }
 
+        if (toExcludeName.indexOf(element.name) > -1) {
+            return;
+        }
+
+        if (toExcludeThirdParty.indexOf(element.thirdParty) > -1) {
+            return;
+        }
+
         if (element.type === inputType) {
             if (dict[element.date.toString()] === undefined) {
                 dict[element.date.toString()] = 0;
@@ -524,24 +536,68 @@ function PlotDay(inputType) {
 
     }, this);
 
-    ActualPlot(dict, 8);
+    ActualPlot(dict, graphSegments);
     var transNameDetails = showTransactionsNameDetails(_sD, _eD, inputType);
     var transThirdPartyDetails = showTransactionsThirdPartyDetails(_sD, _eD, inputType);
-    $('#transactionNameDetails').empty();
-    $('#transactionThirdPartyDetails').empty();
-    Object.keys(transNameDetails).forEach(function (item) {
-        $('#transactionNameDetails').append(" <input type='checkbox' name='transName' value='"+item+"' checked='checked'/>" + item + "<br/>");
-    });
-    Object.keys(transThirdPartyDetails).forEach(function (item) {
-        $('#transactionThirdPartyDetails').append(" <input type='checkbox' name='transName' value='"+item+"' checked='checked'/>" + item + "<br/>");
-        //   $('#transactionThirdPartyDetails').append("<p>" + item + "  </p>");
-    });
 
+
+    if (modifiedCheckboxes == false) {
+
+        $('#transactionNameDetails').empty();
+        $('#transactionThirdPartyDetails').empty();
+
+        Object.keys(transNameDetails).forEach(function (item) {
+            $('#transactionNameDetails').append(" <input type='checkbox' name='transName' value='" + item + "' checked='checked'/>" + item + "<br/>");
+        });
+        Object.keys(transThirdPartyDetails).forEach(function (item) {
+            $('#transactionThirdPartyDetails').append(" <input type='checkbox' name='transThirdParty' value='" + item + "' checked='checked'/>" + item + "<br/>");
+            //   $('#transactionThirdPartyDetails').append("<p>" + item + "  </p>");
+        });
+
+        $('input[type=checkbox]').click(function () {
+            console.log('---- checkbox --- clicked');
+            modifiedCheckboxes = true;
+            var val = $(this).val();
+            var name = $(this).attr('name');
+            console.log('---aa > ' + val + ' ' + name);
+
+            if ($(this).is(':checked') === false) {
+                console.log('-----111');
+                if (name === 'transName') {
+                    toExcludeName.push(val);
+                } else if (name === 'transThirdParty') {
+                    toExcludeThirdParty.push(val);
+                }
+            } else {
+                console.log('-----222');
+                if (name === 'transName') {
+                    removeString(toExcludeName, val);
+                } else if (name === 'transThirdParty') {
+                    removeString(toExcludeThirdParty, val);
+                }
+            }
+            console.log(' --- EXCLUDED: ' + toExcludeName + " " + toExcludeThirdParty);
+            PlotDay(inpType);
+        });
+    }
+
+}
+
+function removeString(array, str) {
+
+    var index = array.indexOf(str);
+    if (index >= 0) {
+        delete array[index];
+    }
 }
 
 function showTransactionsNameDetails(startDate, endDate, inputType) {
     var dict = {};
     dataLoadedProcessed.forEach(function (element) {
+
+        if (element == null) {
+            return;
+        }
 
         if (startDate != null && startDate > element.date) {
             return;
@@ -567,6 +623,10 @@ function showTransactionsThirdPartyDetails(startDate, endDate, inputType) {
     var dict = {};
     dataLoadedProcessed.forEach(function (element) {
 
+        if (element == null) {
+            return;
+        }
+
         if (startDate != null && startDate > element.date) {
             return;
         }
@@ -591,9 +651,11 @@ function showTransactionsThirdPartyDetails(startDate, endDate, inputType) {
 //===========END PLOTS
 
 function showPlotForSpending() {
+    modifiedCheckboxes = false;
     PlotDay('spent');
 }
 
 function showPlotForReceiving() {
+    modifiedCheckboxes = false;
     PlotDay('received');
 }
